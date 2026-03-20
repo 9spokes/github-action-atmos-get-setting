@@ -5,6 +5,9 @@ branding:
   icon: "terminal"
   color: "white"
 inputs:
+  atmos-profile:
+    description: The atmos profile to use
+    required: false
   component:
     description: The atmos component extract the settings for.
     required: false

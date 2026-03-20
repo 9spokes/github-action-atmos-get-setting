@@ -2,7 +2,7 @@ import * as core from "@actions/core";
 import { getSetting, SettingsInput } from "@lib";
 import * as YAML from "yaml";
 
-export const processMultipleSettings = async (processTemplates: boolean, processFunctions: boolean) => {
+export const processMultipleSettings = async (processTemplates: boolean, processFunctions: boolean, atmosProfile?: string) => {
   const settingsInput = core.getInput("settings");
 
   if (settingsInput) {
@@ -20,7 +20,8 @@ export const processMultipleSettings = async (processTemplates: boolean, process
           item.stack,
           item.settingsPath,
           processTemplates,
-          processFunctions);
+          processFunctions,
+          atmosProfile);
         return { ...acc, [outputPath]: result };
       }, Promise.resolve({}));
 
