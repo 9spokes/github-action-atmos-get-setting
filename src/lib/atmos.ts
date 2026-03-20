@@ -1,4 +1,5 @@
 import { execSync } from "node:child_process";
+import * as core from "@actions/core";
 
 export const runAtmosDescribeComponent = async (component: string, stack: string, processTemplates: boolean, processFunctions: boolean, atmosProfile?: string, cwd?: string) => {
   const env = atmosProfile ? { ...process.env, ATMOS_PROFILE: atmosProfile } : process.env;
@@ -13,6 +14,9 @@ export const runAtmosDescribeComponent = async (component: string, stack: string
     command += ` --process-templates=false`;
   }
 
+  core.info(`Running command: ${command}`);
   const atmos = execSync(command, options);
-  return atmos.toString();
+  const output = atmos.toString();
+  core.info(`Command output: ${output}`);
+  return output;
 };
