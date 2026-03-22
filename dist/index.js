@@ -28870,37 +28870,13 @@ exports.NEVER = parseUtil_1.INVALID;
 /***/ }),
 
 /***/ 2492:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.runAtmosDescribeComponent = void 0;
 const node_child_process_1 = __nccwpck_require__(7718);
-const core = __importStar(__nccwpck_require__(2186));
 const runAtmosDescribeComponent = async (component, stack, processTemplates, processFunctions, atmosProfile, cwd) => {
     const env = atmosProfile ? { ...process.env, ATMOS_PROFILE: atmosProfile } : process.env;
     const options = cwd ? { cwd, env } : { env };
@@ -28911,10 +28887,15 @@ const runAtmosDescribeComponent = async (component, stack, processTemplates, pro
     if (!processTemplates) {
         command += ` --process-templates=false`;
     }
-    core.info(`Running command: ${command}`);
+    // core.info(`Running command: ${command}`);
     const atmos = (0, node_child_process_1.execSync)(command, options);
-    const output = atmos.toString();
-    core.info(`Command output: ${output}`);
+    const rawOutput = atmos.toString();
+    // core.info(`Command output: ${rawOutput}`);
+    const jsonStart = rawOutput.indexOf('{');
+    if (jsonStart === -1) {
+        throw new Error('No JSON object found in atmos output');
+    }
+    const output = rawOutput.substring(jsonStart);
     return output;
 };
 exports.runAtmosDescribeComponent = runAtmosDescribeComponent;
