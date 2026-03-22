@@ -14,9 +14,14 @@ export const runAtmosDescribeComponent = async (component: string, stack: string
     command += ` --process-templates=false`;
   }
 
-  core.info(`Running command: ${command}`);
+  // core.info(`Running command: ${command}`);
   const atmos = execSync(command, options);
-  const output = atmos.toString();
-  core.info(`Command output: ${output}`);
+  const rawOutput = atmos.toString();
+  // core.info(`Command output: ${rawOutput}`);
+  const jsonStart = rawOutput.indexOf('{');
+  if (jsonStart === -1) {
+    throw new Error('No JSON object found in atmos output');
+  }
+  const output = rawOutput.substring(jsonStart);
   return output;
 };
