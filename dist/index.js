@@ -29090,12 +29090,24 @@ const processMultipleSettings = async (processTemplates, processFunctions, atmos
         const parseResult = _lib_1.SettingsInput.safeParse(yaml);
         if (parseResult.success && parseResult.data.length > 0) {
             const settings = parseResult.data;
-            const output = await settings.reduce(async (accPromise, item) => {
-                const acc = await accPromise;
-                const { outputPath, ...rest } = item;
-                const result = await (0, _lib_1.getSetting)(item.component, item.stack, item.settingsPath, processTemplates, processFunctions, atmosProfile);
-                return { ...acc, [outputPath]: result };
-            }, Promise.resolve({}));
+            // Group settings by (component, stack) to avoid redundant atmos calls
+            const groups = new Map();
+            for (const item of settings) {
+                const key = `${item.component}\0${item.stack}`;
+                if (!groups.has(key)) {
+                    groups.set(key, []);
+                }
+                groups.get(key).push(item);
+            }
+            const output = {};
+            for (const [key, items] of groups) {
+                const { component, stack } = items[0];
+                const cmdOutput = await (0, _lib_1.runAtmosDescribeComponent)(component, stack, processTemplates, processFunctions, atmosProfile);
+                const json = JSON.parse(cmdOutput);
+                for (const item of items) {
+                    output[item.outputPath] = (0, _lib_1.getNestedValue)(json, item.settingsPath);
+                }
+            }
             core.setOutput("settings", JSON.stringify(output));
             return true;
         }
