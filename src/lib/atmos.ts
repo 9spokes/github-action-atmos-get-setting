@@ -2,7 +2,14 @@ import { execSync } from "node:child_process";
 import * as core from "@actions/core";
 
 export const runAtmosDescribeComponent = async (component: string, stack: string, processTemplates: boolean, processFunctions: boolean, atmosProfile?: string, cwd?: string) => {
-  const env = atmosProfile ? { ...process.env, ATMOS_PROFILE: atmosProfile } : process.env;
+  // Atmos editions >= 2026-07-17 default `describe.component.filter` to "schema",
+  // which drops computed sections like `atmos_cli_config` from the output.
+  // Force the full view so settings-paths keep resolving; respect an explicit override.
+  const env = {
+    ...process.env,
+    ATMOS_DESCRIBE_COMPONENT_FILTER: process.env.ATMOS_DESCRIBE_COMPONENT_FILTER ?? "full",
+    ...(atmosProfile ? { ATMOS_PROFILE: atmosProfile } : {}),
+  };
   const options = cwd ? { cwd, env } : { env };
   let command = `atmos describe component ${component} -s ${stack} --format=json`;
 
